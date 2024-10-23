@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package telephone;
+
+option go_package = "/internal/proto";
+
+message User{
+  uint64 user_id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message Contact {
+  uint64 contact_id = 1;
+  string phone = 2;
+}
+
+message UserContacts{
+  uint64 user_contacts_id = 1;
+  uint64 contact_id = 2;
+  bool is_fav = 3;
+  uint64 user_id = 4;
+}
+
+message AddFavoriteRequest{
+  uint64 user_id = 1;
+  uint64 contact_id = 2;
+}
+
+message AddFavoriteResponse{
+  bool success = 1;
+  string message = 2;
+}
+
+// Request message to create a Contact
+message CreateContactRequest {
+  Contact contact = 1;
+}
+
+// Request message to create a User
+message CreateUserRequest {
+  User user = 1;
+}
+
+message CreateUserContactRequest {
+  UserContacts user_contact = 1;
+}
+
+message CreateUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message CreateContactResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetContactRequest {
+  int32 contact_id = 1;
+}
+
+message GetUserRequest {
+  int32 id = 1;
+}
+
+message GetUserContactRequest {
+  int32 user_contacts_id = 1;
+}
+
+message UpdateContactRequest {
+  Contact contact = 1;
+}
+
+message UpdateUserRequest {
+  User user = 1;
+}
+
+message UpdateUserContactRequest {
+  UserContacts user_contact = 1;
+}
+
+message DeleteContactRequest {
+  int32 contact_id = 1;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message DeleteUserContactRequest {
+  int32 user_contacts_id = 1;
+}
+
+// Response message for Get operations
+message GetContactResponse {
+  Contact contact = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message GetUserContactResponse {
+  UserContacts user_contact = 1;
+}
+
+message Response {
+  bool success = 1;
+  string message = 2;
+}
+
+service UserContactService{
+  // Create ops
+  rpc CreateContact(CreateContactRequest) returns (Response);
+  rpc CreateUser(CreateUserRequest) returns (Response);
+  rpc CreateUserContact(CreateUserContactRequest) returns (Response);
+
+  // Get ops
+  rpc GetContact(GetContactRequest) returns (GetContactResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUserContact(GetUserContactRequest) returns (GetUserContactResponse);
+
+  // Update ops
+  rpc UpdateContact(UpdateContactRequest) returns (Response);
+  rpc UpdateUser(UpdateUserRequest) returns (Response);
+  rpc UpdateUserContact(UpdateUserContactRequest) returns (Response);
+
+  // Delete ops
+  rpc DeleteContact(DeleteContactRequest) returns (Response);
+  rpc DeleteUser(DeleteUserRequest) returns (Response);
+  rpc DeleteUserContact(DeleteUserContactRequest) returns (Response);
+}

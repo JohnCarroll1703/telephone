@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package contact;
+
+option go_package = "/proto";
+
+message Contact{
+  uint64 id = 1;
+  string name = 2;
+  string number = 3;
+}
+
+message ReadContactsRequest{
+
+}
+
+message ReadContactRequest{
+  uint64 id = 1;
+}
+
+
+
+service ContactService {
+  rpc GetContacts(ReadContactRequest) returns ()
+  rpc GetContactById() returns ()
+  rpc
+}
