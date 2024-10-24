@@ -12,27 +12,20 @@ import (
 
 type User interface {
 	CreateUser(ctx context.Context, user *model.User) error
-	GetUserByID(ctx context.Context, id int) (*model.User, error)
-	GetAllUsers() ([]*model.User, error)
-	UpdateUser(ctx context.Context, user *model.User) error
-	DeleteUser(ctx context.Context, id int) error
+	GetUserByID(ctx context.Context, id int) (model.User, error)
+	GetAllUsers() ([]model.User, error)
 }
 
 type Contact interface {
 	CreateContact(ctx context.Context, contact *model.Contact) error
 	GetContactByID(ctx context.Context, id int) (*model.Contact, error)
-	GetAllContacts() ([]*model.Contact, error)
-	UpdateContact(ctx context.Context, id int, updatedContact *model.Contact) error
-	DeleteContact(ctx context.Context, id int) error
+	GetAllContacts() ([]model.Contact, error)
+	GetContactByPhone(ctx context.Context, phone string) (*model.Contact, error)
 }
 
 type UserContacts interface {
 	AddUserContact(ctx context.Context, userID int,
-		contact model.Contact, isFav bool,
-		userContact model.UserContacts) error
-	RemoveUserContact(ctx context.Context,
-		userID int,
-		contactID int) error
+		phone string) error
 }
 
 type Repositories struct {
