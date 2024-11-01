@@ -2,6 +2,7 @@ package http
 
 import (
 	"git.tarlanpayments.kz/pkg/golog"
+	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/trace"
 	"telephone/internal/config"
 	"telephone/internal/service"
@@ -25,4 +26,15 @@ func NewHandler(
 		services:    services,
 		config:      config,
 	}
+}
+
+func (h Handler) Init() *gin.Engine {
+	router := gin.New()
+
+	_ = router.Group("/users")
+	{
+
+	}
+
+	return router
 }

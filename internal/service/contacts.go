@@ -21,12 +21,22 @@ func (c ContactService) GetContacts() ([]model.Contact, error) {
 	return c.repos.ContactRepo.GetAllContacts()
 }
 
-func (c ContactService) CreateContact(ctx context.Context, contact *schema.Contact) error {
+func (c ContactService) CreateContact(ctx context.Context, contact *schema.Contact) (_ *model.Contact, err error) {
 	return c.repos.ContactRepo.CreateContact(ctx, schema.NewCreateContactRequest(contact))
 }
 
-func (c ContactService) GetContactByID(ctx context.Context, id int) (*model.Contact, error) {
-	return c.repos.ContactRepo.GetContactByID(ctx, id)
+func (c ContactService) GetContactByID(ctx context.Context, id uint64) (schema.ContactResponse, error) {
+	data, err := c.repos.ContactRepo.GetContactByID(ctx, id)
+	if err != nil {
+		return schema.ContactResponse{}, err
+	}
+	res := schema.ContactResponse{
+		ContactID:   uint64(data.ContactID),
+		ContactName: data.ContactName,
+		PhoneNumber: data.PhoneNumber,
+	}
+
+	return res, err
 }
 
 func NewContactService(

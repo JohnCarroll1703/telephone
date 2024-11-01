@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"telephone/internal/model"
+	"telephone/pkg/terr"
 )
 
 type Contact struct {
@@ -18,37 +19,41 @@ type Contact struct {
 	db       *gorm.DB
 }
 
-func (c Contact) CreateContact(ctx context.Context, contact *model.Contact) error {
-	return c.db.Create(&contact).Error
+func (c Contact) CreateContact(ctx context.Context, contact *model.Contact) (err error) {
+	if err = c.db.WithContext(ctx).Create(&contact).Error; err != nil {
+		return terr.ErrDbUnexpected
+	}
+	return nil
 }
 
-func (c Contact) GetContactByID(ctx context.Context, id int) (*model.Contact, error) {
+func (c Contact) GetContactByID(ctx context.Context, id uint64) (*model.Contact, error) {
 	var contact model.Contact
 	err := c.db.First(&contact, id).Error
 	return &contact, err
 }
 
 func (c Contact) GetAllContacts() ([]model.Contact, error) {
-	var db *gorm.DB
 	var contacts []model.Contact
-	err := db.Model(&model.Contact{}).Find(&contacts).Error
+	err := c.db.Model(&model.Contact{}).Find(&contacts).Error
 	return contacts, err
 }
 
-func (c Contact) GetContactByPhone(ctx context.Context,
-	phone string) (*model.Contact, error) {
-	var contact model.Contact
-	err := c.db.Where("contact_id = ?").Find(&phone).Error
-	return &contact, err
+func (c Contact) GetByPhone(
+	ctx context.Context,
+	phone string,
+) (resp *model.Contact, err error) {
+	err = c.db.Where("contact_id = ?").
+		Find(&phone).Error
+	return resp, err
 }
 
 func NewContact(
 	log golog.ContextLogger,
 	tr trace.Tracer,
-	postgre *pgx.Conn) *Contact {
+	db *gorm.DB) *Contact {
 	return &Contact{
-		log:      log,
-		tr:       tr,
-		postgres: postgre,
+		log: log,
+		tr:  tr,
+		db:  db,
 	}
 }

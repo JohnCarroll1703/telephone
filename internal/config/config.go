@@ -23,8 +23,7 @@ type (
 	}
 
 	GrpcConnections struct {
-		Auth     string `envconfig:"AUTH_URL" default:"auth:4040"`
-		Acquirer string `envconfig:"ACQUIRER_URL" required:"true"`
+		Auth string `envconfig:"AUTH_URL" default:"auth:4040"`
 	}
 
 	Service struct {

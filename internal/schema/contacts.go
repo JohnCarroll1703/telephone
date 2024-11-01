@@ -1,26 +1,55 @@
 package schema
 
-import "telephone/internal/model"
+import (
+	"telephone/internal/model"
+)
 
 type Contact struct {
-	ContactID   int    `json:"id"`
+	ContactID   uint64 `json:"id"`
 	ContactName string `json:"contact_name"`
 	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
+}
+
+type ContactRequest struct {
+	ContactName string `json:"contact_name"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+type ContactResponse struct {
+	ContactID   uint64 `json:"id"`
+	ContactName string `json:"contact_name"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+type AddContactRequest struct {
+	ContactName string `json:"contact_name"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+type AddContactResponse struct {
+	ID          uint64 `json:"id"`
+	ContactName string `json:"contact_name"`
+	PhoneNumber string `json:"phone_number"`
 }
 
 func NewCreateContactRequest(req *Contact) *model.Contact {
 	return &model.Contact{
-		ContactID:   req.ContactID,
 		ContactName: req.ContactName,
 		PhoneNumber: req.PhoneNumber,
 	}
 }
 
-func NewUpdateContactRequest(req *Contact) *model.Contact {
+func NewContactRequest(req *ContactRequest) *model.Contact {
 	return &model.Contact{
-		ContactID:   req.ContactID,
 		ContactName: req.ContactName,
 		PhoneNumber: req.PhoneNumber,
+	}
+}
+
+func NewUpdateContactRequest(req *AddContactRequest) *model.Contact {
+	return &model.Contact{
+		ContactName:  req.ContactName,
+		PhoneNumber:  req.PhoneNumber,
+		UserContacts: nil,
 	}
 }

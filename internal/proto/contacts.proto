@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package telephone;
 
-option go_package = "/internal/proto";
+option go_package = "/internal/proto/contacts";
 
 message User{
   uint64 user_id = 1;
@@ -22,12 +22,8 @@ message UserContacts{
   uint64 user_id = 4;
 }
 
-message AddFavoriteRequest{
-  uint64 user_id = 1;
-  uint64 contact_id = 2;
-}
 
-message AddFavoriteResponse{
+message AddUserContactResponse{
   bool success = 1;
   string message = 2;
 }
@@ -42,7 +38,7 @@ message CreateUserRequest {
   User user = 1;
 }
 
-message CreateUserContactRequest {
+message AddUserContactRequest {
   UserContacts user_contact = 1;
 }
 
@@ -68,7 +64,6 @@ message GetUserContactRequest {
   int32 user_contacts_id = 1;
 }
 
-// Response message for Get operations
 message GetContactResponse {
   Contact contact = 1;
 }
@@ -86,11 +81,18 @@ message CreateUserContactResponse {
   string message = 2;
 }
 
+message GetUsersRequest{
+
+}
+message GetUsersResponse{
+  repeated User users = 1;
+}
+
 service UserContactService{
   rpc CreateContact(CreateContactRequest) returns (CreateContactResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc CreateUserContact(CreateUserContactRequest) returns (CreateUserContactResponse);
-
+  rpc AddUserContact(AddUserContactRequest) returns (AddUserContactResponse);
+  rpc GetAllUsers(GetUsersRequest) returns (GetUsersResponse);
   rpc GetContact(GetContactRequest) returns (GetContactResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc GetUserContact(GetUserContactRequest) returns (GetUserContactResponse);

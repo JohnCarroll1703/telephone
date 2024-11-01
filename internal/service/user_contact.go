@@ -2,12 +2,15 @@ package service
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"git.tarlanpayments.kz/pkg/golog"
 	"go.opentelemetry.io/otel/trace"
+	"gorm.io/gorm"
 	"telephone/internal/config"
 	"telephone/internal/model"
 	"telephone/internal/repository"
+	"telephone/pkg/terr"
+
 	"telephone/internal/schema"
 )
 
@@ -31,28 +34,71 @@ func NewUserContactService(
 	}
 }
 
-func (s UserContactsService) Create(ctx context.Context, userId int, phone string) error {
-	return s.repos.UserContactRepository.AddUserContact(ctx, userId, phone)
-}
-
-func (s UserContactsService) AddUserContact(
+func (s UserContactsService) AddContacts(
 	ctx context.Context,
-	userID int, phone string, contact *schema.Contact) error {
-	var _ error
-	_, err := s.repos.ContactRepo.GetContactByPhone(ctx, phone)
-	if err != nil {
-		_ = s.repos.ContactRepo.CreateContact(ctx, schema.NewCreateContactRequest(contact))
+	userID uint64,
+	request *schema.AddContactRequest,
+) (*schema.AddContactResponse, error) {
+	var (
+		findContact *model.Contact
+		relation    *model.UserContacts
+	)
+
+	findContact, err := s.repos.ContactRepo.GetByPhone(ctx, request.PhoneNumber)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		findContact, err = s.repos.ContactRepo.CreateContact(ctx, findContact)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return s.repos.UserContactRepository.AddUserContact(ctx, userID, phone)
+	relation, err = s.repos.UserContactRepository.GetByUserIDContactID(int(userID), findContact.ContactID)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		relation, err = s.repos.UserContactRepository.
+			AddContacts(int(userID), findContact.ContactID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &schema.AddContactResponse{
+		ID:          uint64(relation.ContactID),
+		ContactName: findContact.ContactName,
+		PhoneNumber: findContact.PhoneNumber,
+	}, nil
 }
 
 func (s UserContactsService) GetUserContacts(ctx context.Context, userID int) ([]model.UserContacts, error) {
 	user, err := s.repos.UserRepo.GetUserByID(ctx, userID)
 	if err != nil {
-		_ = fmt.Errorf("user not found. Impossible to retrieve a list of contacts")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []model.UserContacts{}, terr.RecordNotFound
+		}
 	}
 
 	res := user.UserContacts
 	return res, err
+}
+
+func (s UserContactsService) GetByUserIDContactID(userID int, contactID int) (_ *model.UserContacts, err error) {
+	data, err := s.repos.UserContactRepository.GetByUserIDContactID(userID, contactID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.UserContacts{}, terr.RecordNotFound
+		}
+	}
+	return &model.UserContacts{
+		UserContactsID: data.UserContactsID,
+		UserID:         data.UserID,
+		ContactID:      data.ContactID,
+		IsFavorite:     data.IsFavorite,
+		Contact:        data.Contact,
+		User:           data.User,
+	}, nil
 }

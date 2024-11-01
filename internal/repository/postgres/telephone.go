@@ -2,12 +2,14 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"git.tarlanpayments.kz/pkg/golog"
 	"github.com/jackc/pgx/v5"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"net/http"
 	"telephone/internal/model"
+	"telephone/pkg/terr"
 	"time"
 )
 
@@ -19,36 +21,33 @@ type Telephone struct {
 	db       *gorm.DB
 }
 
-func NewTelephone(log golog.ContextLogger, tr trace.Tracer, postgres *pgx.Conn) *Telephone {
+func NewTelephone(log golog.ContextLogger, tr trace.Tracer, db *gorm.DB) *Telephone {
 	return &Telephone{
 		client: &http.Client{
 			Timeout: time.Minute,
 		},
-		log:      log,
-		tr:       tr,
-		postgres: postgres,
+		log: log,
+		tr:  tr,
+		db:  db,
 	}
 }
 
 func (t Telephone) GetAllUsers() ([]model.User, error) {
-	var db *gorm.DB
 	var users []model.User
-	err := db.Model(&model.User{}).Find(&users).Error
+	err := t.db.Model(&model.User{}).Find(&users).Error
 	return users, err
 }
 
-func (t Telephone) GetUserByID(ctx context.Context, id int) (model.User, error) {
-	var user model.User
-	res := t.db.Find(&user, id)
-	if res.Error != nil {
-		return model.User{}, res.Error
+func (t Telephone) GetUserByID(ctx context.Context, id int) (user *model.User, err error) {
+	err = t.db.Find(&user, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, terr.RecordNotFound
+		}
+		return &model.User{}, err
 	}
 
-	if res.RowsAffected == 0 {
-		return model.User{}, res.Error
-	}
-
-	return res, nil
+	return user, nil
 }
 
 func (t Telephone) CreateUser(

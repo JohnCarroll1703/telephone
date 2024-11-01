@@ -1,17 +1,14 @@
 package app
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"git.tarlanpayments.kz/pkg/golog"
 	"git.tarlanpayments.kz/pkg/gosentry"
-	"git.tarlanpayments.kz/processing/jusan/docs"
-	"git.tarlanpayments.kz/processing/jusan/pkg/openapi"
-	"github.com/jackc/pgx/v5"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"go.opentelemetry.io/otel/trace"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"os/signal"
@@ -33,9 +30,7 @@ func Run(config *config.Config) {
 		panic(err)
 	}
 
-	openApiInit(config, logger)
-
-	postgres, err := pgx.Connect(context.Background(), config.Database.PostgreDSN)
+	db, err := gorm.Open(postgres.Open(config.Database.PostgreDSN), &gorm.Config{})
 	if err != nil {
 		logger.Fatalw(err.Error())
 	}
@@ -55,7 +50,7 @@ func Run(config *config.Config) {
 	}
 
 	services := service.NewServices(service.Deps{
-		Repos:        repository.NewRepositories(config, tr, logger, postgres),
+		Repos:        repository.NewRepositories(config, tr, logger, db),
 		Cgf:          config,
 		Logger:       logger,
 		JeagerTracer: tr,
@@ -71,24 +66,6 @@ func Run(config *config.Config) {
 	<-quit
 
 	gracefulShutdown(logger)
-}
-
-func openApiInit(cfg *config.Config, log *golog.ZapLogger) {
-	if cfg.Service.Domain == "127.0.0.1" || cfg.Service.Domain == "localhost" {
-		docs.SwaggerInfo.Host = fmt.Sprintf("localhost:%s", cfg.Service.Port)
-		docs.SwaggerInfo.Schemes = []string{"http", "https"}
-	} else {
-		docs.SwaggerInfo.Host = cfg.Service.Domain
-		docs.SwaggerInfo.Schemes = []string{"http", "https"}
-	}
-
-	if err := openapi.NewOpenApiClient(
-		cfg.Service.AppName,
-		cfg.Service.Openapi,
-		docs.SwaggerInfo.ReadDoc()).Send(
-		context.Background()).Error(); err != nil {
-		log.Fatalw(err.Error())
-	}
 }
 
 func runGRPCServer(srv *server.GrpcServer, log *golog.ZapLogger) {

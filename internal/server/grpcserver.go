@@ -12,8 +12,10 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"net"
 	"telephone/internal/config"
+	v1 "telephone/internal/delivery/grpc/v1"
 	"telephone/internal/service"
 	"telephone/pkg/tracing"
 )
@@ -24,6 +26,7 @@ type GrpcServer struct {
 	services *service.Services
 	log      golog.ContextLogger
 	trace    trace.Tracer
+	logger   golog.ContextLogger
 }
 
 func NewGRPCServer(
@@ -78,10 +81,14 @@ func NewGRPCServer(
 func (gs *GrpcServer) Run() error {
 	defer gs.server.GracefulStop()
 
+	serviceIns := v1.NewServer(gs.services, gs.trace, gs.logger)
+
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gs.port))
 	if err != nil {
 		return fmt.Errorf("failed to listen to gRPC port (%s): %v", gs.port, err)
 	}
+
+	reflection.Register(gs.server)
 
 	return gs.server.Serve(listen)
 }

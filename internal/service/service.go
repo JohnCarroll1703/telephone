@@ -42,14 +42,15 @@ type Telephone interface {
 
 type Contact interface {
 	GetContacts() ([]model.Contact, error)
-	CreateContact(ctx context.Context, contact *schema.Contact) error
-	GetContactByID(ctx context.Context, id int) (*model.Contact, error)
+	CreateContact(ctx context.Context, contact *schema.Contact) (_ *model.Contact, err error)
+	GetContactByID(ctx context.Context, id uint64) (schema.ContactResponse, error)
 }
 
 type UserContacts interface {
-	AddUserContact(
+	AddContacts(
 		ctx context.Context,
-		userID int, phone string, contact *schema.Contact) error
-	Create(ctx context.Context, userId int, phone string) error
+		userID uint64,
+		request *schema.AddContactRequest,
+	) (*schema.AddContactResponse, error)
 	GetUserContacts(ctx context.Context, userID int) ([]model.UserContacts, error)
 }
