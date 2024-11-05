@@ -26,13 +26,3 @@ func (srv *Server) CreateContact(request *pb.CreateContactRequest) (*pb.CreateCo
 	return &pb.CreateContactResponse{
 		Message: "contact is created successfully"}, nil
 }
-
-func (s *Server) GetAllUsers(request *pb.GetUsersRequest) *pb.GetUsersResponse {
-	res, err := s.services.GetAllUsers()
-	if err != nil {
-		return &pb.GetUsersResponse{}
-	}
-	return &pb.GetUsersResponse{
-		Users: res,
-	}
-}

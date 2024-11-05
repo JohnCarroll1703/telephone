@@ -15,7 +15,6 @@ import (
 	"google.golang.org/grpc/reflection"
 	"net"
 	"telephone/internal/config"
-	v1 "telephone/internal/delivery/grpc/v1"
 	"telephone/internal/service"
 	"telephone/pkg/tracing"
 )
@@ -81,7 +80,7 @@ func NewGRPCServer(
 func (gs *GrpcServer) Run() error {
 	defer gs.server.GracefulStop()
 
-	serviceIns := v1.NewServer(gs.services, gs.trace, gs.logger)
+	//serviceIns := v1.NewServer(gs.services, gs.trace, gs.logger)
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gs.port))
 	if err != nil {

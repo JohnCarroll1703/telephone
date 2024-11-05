@@ -11,10 +11,6 @@ import (
 	"telephone/internal/schema"
 )
 
-const (
-	sortBySeparator string = ", "
-)
-
 type User interface {
 	CreateUser(ctx context.Context, user *model.User) error
 	GetUserByID(ctx context.Context, id int) (*model.User, error)
