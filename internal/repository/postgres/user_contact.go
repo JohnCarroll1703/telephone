@@ -7,9 +7,14 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"net/http"
+	"strings"
 	"telephone/internal/model"
 	"telephone/internal/schema"
 	"telephone/pkg/terr"
+)
+
+const (
+	sortBySeparator string = ", "
 )
 
 type UserContacts struct {
@@ -68,6 +73,27 @@ func (u UserContacts) AddContacts(userID int, contactID int) (_ *model.UserConta
 	}
 
 	return nil, nil
+}
+
+func (u UserContacts) sortBy(filter schema.UserAndContactFilter) string {
+	sortRes := strings.Split(filter.SortBy, ",")
+	sort := ""
+
+	for key, value := range sortRes {
+		if key%2 == 0 {
+			sort += value + " "
+		} else {
+			sort += value + sortBySeparator
+		}
+	}
+
+	if sort == " " {
+		return schema.DefaultOrder
+	}
+
+	sort = sort[:len(sort)-2]
+
+	return sort
 }
 
 func NewUserContacts(
