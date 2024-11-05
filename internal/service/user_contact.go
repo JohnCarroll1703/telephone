@@ -41,7 +41,7 @@ func (s UserContactsService) AddContacts(
 ) (*schema.AddContactResponse, error) {
 	var (
 		findContact *model.Contact
-		relation    *model.UserContacts
+		relation    *model.UserContactRelation
 	)
 
 	findContact, err := s.repos.ContactRepo.GetByPhone(ctx, request.PhoneNumber)
@@ -74,31 +74,32 @@ func (s UserContactsService) AddContacts(
 	}, nil
 }
 
-func (s UserContactsService) GetUserContacts(ctx context.Context, userID int) ([]model.UserContacts, error) {
+func (s UserContactsService) ListFav(ctx context.Context, userID int,
+) (*model.UserContactRelation, error) { // listFav типо
 	user, err := s.repos.UserRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return []model.UserContacts{}, terr.RecordNotFound
+			return nil, terr.RecordNotFound
 		}
+		return nil, err
 	}
 
-	res := user.UserContacts
+	res, err := s.repos.UserContactRepository.ListFav(user.ID)
 	return res, err
 }
 
-func (s UserContactsService) GetByUserIDContactID(userID int, contactID int) (_ *model.UserContacts, err error) {
+func (s UserContactsService) GetByUserIDContactID(userID int, contactID int) (_ *model.UserContactRelation, err error) {
 	data, err := s.repos.UserContactRepository.GetByUserIDContactID(userID, contactID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &model.UserContacts{}, terr.RecordNotFound
+			return &model.UserContactRelation{}, terr.RecordNotFound
 		}
+		return nil, err
 	}
-	return &model.UserContacts{
+	return &model.UserContactRelation{
 		UserContactsID: data.UserContactsID,
 		UserID:         data.UserID,
 		ContactID:      data.ContactID,
-		IsFavorite:     data.IsFavorite,
-		Contact:        data.Contact,
-		User:           data.User,
+		IsFavorite:     true,
 	}, nil
 }
