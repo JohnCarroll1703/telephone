@@ -11,6 +11,10 @@ import (
 	"telephone/internal/schema"
 )
 
+const (
+	sortBySeparator string = ", "
+)
+
 type User interface {
 	CreateUser(ctx context.Context, user *model.User) error
 	GetUserByID(ctx context.Context, id int) (*model.User, error)
@@ -28,12 +32,13 @@ type Contact interface {
 }
 
 type UserContacts interface {
-	GetByPhone(ctx context.Context, req schema.AddContactRequest,
-	) (contactRelation *model.UserContacts, err error)
-	AddContacts(userID int, contactID int) (_ *model.UserContacts, err error)
+	GetByPhone(ctx context.Context, req schema.ContactRequest,
+	) (contactRelation *model.UserContactRelation, err error)
+	AddContacts(userID int, contactID int) (_ *model.UserContactRelation, err error)
 	GetByUserIDContactID(userID int, contactID int) (
-		contactRelation *model.UserContacts,
+		contactRelation *model.UserContactRelation,
 		err error)
+	ListFav(userID int) (contactRelation *model.UserContactRelation, err error)
 }
 
 type Repositories struct {

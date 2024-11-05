@@ -2,6 +2,7 @@ package schema
 
 import (
 	"telephone/internal/model"
+	"time"
 )
 
 type Contact struct {
@@ -48,8 +49,13 @@ func NewContactRequest(req *ContactRequest) *model.Contact {
 
 func NewUpdateContactRequest(req *AddContactRequest) *model.Contact {
 	return &model.Contact{
-		ContactName:  req.ContactName,
-		PhoneNumber:  req.PhoneNumber,
-		UserContacts: nil,
+		ContactName: req.ContactName,
+		PhoneNumber: req.PhoneNumber,
 	}
+}
+
+type ContactFilter struct {
+	CreatedAt   time.Time `json:"created_at" form:"created_at" time_format:"2003-03-17"`
+	PhoneNumber string    `json:"phone_number"`
+	SortBy      string    `json:"sort_by" validate:"omitempty"`
 }

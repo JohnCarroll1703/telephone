@@ -19,11 +19,11 @@ type Contact struct {
 	db       *gorm.DB
 }
 
-func (c Contact) CreateContact(ctx context.Context, contact *model.Contact) (err error) {
+func (c Contact) CreateContact(ctx context.Context, contact *model.Contact) (_ *model.Contact, err error) {
 	if err = c.db.WithContext(ctx).Create(&contact).Error; err != nil {
-		return terr.ErrDbUnexpected
+		return nil, terr.ErrDbUnexpected
 	}
-	return nil
+	return nil, nil
 }
 
 func (c Contact) GetContactByID(ctx context.Context, id uint64) (*model.Contact, error) {

@@ -30,7 +30,7 @@ type Deps struct {
 type Services struct {
 	telephoneService   Telephone
 	contactService     Contact
-	userContactService UserContacts
+	userContactService UserContactRelation
 }
 
 type Telephone interface {
@@ -46,11 +46,12 @@ type Contact interface {
 	GetContactByID(ctx context.Context, id uint64) (schema.ContactResponse, error)
 }
 
-type UserContacts interface {
+type UserContactRelation interface {
 	AddContacts(
 		ctx context.Context,
 		userID uint64,
 		request *schema.AddContactRequest,
 	) (*schema.AddContactResponse, error)
-	GetUserContacts(ctx context.Context, userID int) ([]model.UserContacts, error)
+	ListFav(ctx context.Context, userID int,
+	) (*model.UserContactRelation, error)
 }

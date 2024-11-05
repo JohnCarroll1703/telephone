@@ -19,42 +19,55 @@ type UserContacts struct {
 	db     *gorm.DB
 }
 
-func (u UserContacts) GetByPhone(ctx context.Context, req schema.AddContactRequest,
-) (contactRelation *model.UserContacts, err error) {
+func (u UserContacts) ListFav(userID int) (contactRelation *model.UserContactRelation, err error) {
+	err = u.db.Where("id = ?", userID).Find(&model.UserContactRelation{}).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, terr.RecordNotFound
+		}
+		return nil, err
+	}
+
+	return contactRelation, nil
+}
+
+func (u UserContacts) GetByPhone(ctx context.Context, req schema.ContactRequest,
+) (contactRelation *model.UserContactRelation, err error) {
 	err = u.db.Where("user_id = ?", "contact_id = ?").First(&req).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 		}
-		return &model.UserContacts{}, terr.RecordNotFound
+		return nil, terr.RecordNotFound
 	}
 
 	return contactRelation, err
 }
 
 func (u UserContacts) GetByUserIDContactID(userID int, contactID int) (
-	contactRelation *model.UserContacts,
+	contactRelation *model.UserContactRelation,
 	err error) {
 	err = u.db.Where("contact_id = ? AND user_id = ?", contactID, userID).First(&contactRelation).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &model.UserContacts{}, terr.RecordNotFound
+			return &model.UserContactRelation{}, terr.RecordNotFound
 		}
+		return nil, err
 	}
 
 	return contactRelation, err
 }
 
-func (u UserContacts) AddContacts(userID int, contactID int) (err error) {
-	err = u.db.Create(&model.UserContacts{
+func (u UserContacts) AddContacts(userID int, contactID int) (_ *model.UserContactRelation, err error) {
+	err = u.db.Create(&model.UserContactRelation{
 		UserID:    userID,
 		ContactID: contactID}).
 		Error
 
 	if err != nil {
-		return terr.ErrDbUnexpected
+		return nil, terr.ErrDbUnexpected
 	}
 
-	return nil
+	return nil, nil
 }
 
 func NewUserContacts(
