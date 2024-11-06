@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"errors"
-	"git.tarlanpayments.kz/pkg/golog"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"net/http"
@@ -19,7 +18,6 @@ const (
 
 type UserContacts struct {
 	client *http.Client
-	log    golog.ContextLogger
 	tr     trace.Tracer
 	db     *gorm.DB
 }
@@ -36,8 +34,8 @@ func (u UserContacts) ListFav(userID int) (contactRelation *model.UserContactRel
 	return contactRelation, nil
 }
 
-func (u UserContacts) GetByPhone(ctx context.Context, req schema.ContactRequest,
-) (contactRelation *model.UserContactRelation, err error) {
+func (u UserContacts) GetByPhone(ctx context.Context, req schema.ContactRequest) (contactRelation *model.UserContactRelation, err error) {
+
 	err = u.db.Where("user_id = ?", "contact_id = ?").First(&req).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -97,12 +95,10 @@ func (u UserContacts) sortBy(filter schema.UserAndContactFilter) string {
 }
 
 func NewUserContacts(
-	log golog.ContextLogger,
 	tr trace.Tracer,
 	db *gorm.DB) *UserContacts {
 	return &UserContacts{
-		log: log,
-		tr:  tr,
-		db:  db,
+		tr: tr,
+		db: db,
 	}
 }

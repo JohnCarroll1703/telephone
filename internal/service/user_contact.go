@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"git.tarlanpayments.kz/pkg/golog"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"telephone/internal/config"
@@ -15,22 +14,19 @@ import (
 )
 
 type UserContactsService struct {
-	repos  *repository.Repositories
-	logger golog.ContextLogger
-	tr     trace.Tracer
-	cfg    *config.Config
+	repos *repository.Repositories
+	tr    trace.Tracer
+	cfg   *config.Config
 }
 
 func NewUserContactService(
 	repos *repository.Repositories,
-	logger golog.ContextLogger,
 	tr trace.Tracer,
 	cfg *config.Config) *UserContactsService {
 	return &UserContactsService{
-		repos:  repos,
-		logger: logger,
-		tr:     tr,
-		cfg:    cfg,
+		repos: repos,
+		tr:    tr,
+		cfg:   cfg,
 	}
 }
 
@@ -68,8 +64,7 @@ func (s UserContactsService) AddContacts(
 	}
 
 	return &schema.AddContactResponse{
-		ID:          uint64(relation.ContactID),
-		ContactName: findContact.ContactName,
+		ContactID:   uint64(relation.ContactID),
 		PhoneNumber: findContact.PhoneNumber,
 	}, nil
 }

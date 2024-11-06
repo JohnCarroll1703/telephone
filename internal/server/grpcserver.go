@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"git.tarlanpayments.kz/pkg/golog"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpcprom "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	grpc_tags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
@@ -15,6 +14,8 @@ import (
 	"google.golang.org/grpc/reflection"
 	"net"
 	"telephone/internal/config"
+	v1 "telephone/internal/delivery/grpc/v1"
+	pb "telephone/internal/proto"
 	"telephone/internal/service"
 	"telephone/pkg/tracing"
 )
@@ -23,9 +24,7 @@ type GrpcServer struct {
 	server   *grpc.Server
 	port     string
 	services *service.Services
-	log      golog.ContextLogger
 	trace    trace.Tracer
-	logger   golog.ContextLogger
 }
 
 func NewGRPCServer(
@@ -33,7 +32,6 @@ func NewGRPCServer(
 	services *service.Services,
 	jaegerTrace trace.Tracer,
 	prom *prometheus.Registry,
-	logger *golog.ZapLogger,
 ) (*GrpcServer, error) {
 	srvMetrics := grpcprom.NewServerMetrics(
 		grpcprom.WithServerHandlingTimeHistogram(
@@ -72,7 +70,6 @@ func NewGRPCServer(
 		port:     cfg.Service.GrpcPort,
 		services: services,
 		trace:    jaegerTrace,
-		log:      logger,
 	}, nil
 }
 
@@ -80,7 +77,9 @@ func NewGRPCServer(
 func (gs *GrpcServer) Run() error {
 	defer gs.server.GracefulStop()
 
-	//serviceIns := v1.NewServer(gs.services, gs.trace, gs.logger)
+	serviceIns := v1.NewServer(gs.services, gs.trace)
+
+	pb.RegisterUserContactServiceServer(gs.server, serviceIns)
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gs.port))
 	if err != nil {

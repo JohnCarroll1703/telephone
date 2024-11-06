@@ -2,6 +2,7 @@ package schema
 
 import (
 	"telephone/internal/model"
+	pb "telephone/internal/proto"
 	"time"
 )
 
@@ -28,29 +29,20 @@ type AddContactRequest struct {
 }
 
 type AddContactResponse struct {
-	ID          uint64 `json:"id"`
-	ContactName string `json:"contact_name"`
+	ContactID   uint64 `json:"id"`
 	PhoneNumber string `json:"phone_number"`
 }
 
 func NewCreateContactRequest(req *Contact) *model.Contact {
 	return &model.Contact{
-		ContactName: req.ContactName,
+		ContactID:   int(req.ContactID),
 		PhoneNumber: req.PhoneNumber,
 	}
 }
 
-func NewContactRequest(req *ContactRequest) *model.Contact {
-	return &model.Contact{
-		ContactName: req.ContactName,
-		PhoneNumber: req.PhoneNumber,
-	}
-}
-
-func NewUpdateContactRequest(req *AddContactRequest) *model.Contact {
-	return &model.Contact{
-		ContactName: req.ContactName,
-		PhoneNumber: req.PhoneNumber,
+func NewFromProtoToModelCreateContactRequest(req *pb.CreateContactRequest) *Contact {
+	return &Contact{
+		PhoneNumber: req.Contact.Phone,
 	}
 }
 

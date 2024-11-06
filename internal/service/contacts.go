@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"git.tarlanpayments.kz/pkg/golog"
 	"go.opentelemetry.io/otel/trace"
 	"telephone/internal/config"
 	"telephone/internal/model"
@@ -11,10 +10,9 @@ import (
 )
 
 type ContactService struct {
-	repos  *repository.Repositories
-	logger golog.ContextLogger
-	tr     trace.Tracer
-	cfg    *config.Config
+	repos *repository.Repositories
+	tr    trace.Tracer
+	cfg   *config.Config
 }
 
 func (c ContactService) GetContacts() ([]model.Contact, error) {
@@ -32,7 +30,6 @@ func (c ContactService) GetContactByID(ctx context.Context, id uint64) (schema.C
 	}
 	res := schema.ContactResponse{
 		ContactID:   uint64(data.ContactID),
-		ContactName: data.ContactName,
 		PhoneNumber: data.PhoneNumber,
 	}
 
@@ -41,14 +38,12 @@ func (c ContactService) GetContactByID(ctx context.Context, id uint64) (schema.C
 
 func NewContactService(
 	repos *repository.Repositories,
-	log golog.ContextLogger,
 	tr trace.Tracer,
 	cfg *config.Config,
 ) *ContactService {
 	return &ContactService{
-		repos:  repos,
-		logger: log,
-		tr:     tr,
-		cfg:    cfg,
+		repos: repos,
+		tr:    tr,
+		cfg:   cfg,
 	}
 }

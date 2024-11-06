@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"git.tarlanpayments.kz/pkg/golog"
 	"github.com/jackc/pgx/v5"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
@@ -13,7 +12,6 @@ import (
 
 type Contact struct {
 	client   *http.Client
-	log      golog.ContextLogger
 	tr       trace.Tracer
 	postgres *pgx.Conn
 	db       *gorm.DB
@@ -48,12 +46,10 @@ func (c Contact) GetByPhone(
 }
 
 func NewContact(
-	log golog.ContextLogger,
 	tr trace.Tracer,
 	db *gorm.DB) *Contact {
 	return &Contact{
-		log: log,
-		tr:  tr,
-		db:  db,
+		tr: tr,
+		db: db,
 	}
 }

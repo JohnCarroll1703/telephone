@@ -2,23 +2,20 @@ package service
 
 import (
 	"context"
-	"git.tarlanpayments.kz/pkg/golog"
 	"go.opentelemetry.io/otel/trace"
 	"telephone/internal/config"
 	"telephone/internal/model"
 	"telephone/internal/repository"
 	"telephone/internal/schema"
-	"telephone/pkg/tracing"
 )
 
 type TelephoneService struct {
-	repos  *repository.Repositories
-	logger golog.ContextLogger
-	tr     trace.Tracer
-	cfg    *config.Config
+	repos *repository.Repositories
+	tr    trace.Tracer
+	cfg   *config.Config
 }
 
-func (t TelephoneService) CreateUser(ctx context.Context, user *schema.User) error {
+func (t TelephoneService) CreateUser(ctx context.Context, user *schema.User) (_ *model.User, err error) {
 	return t.repos.UserRepo.CreateUser(ctx, schema.NewCreateUserRequest(user))
 }
 
@@ -36,23 +33,18 @@ func (t TelephoneService) GetUserByID(ctx context.Context, id int) (schema.User,
 }
 
 func (t TelephoneService) GetAllUsers(ctx context.Context,
-	tr trace.Tracer,
-	funcName string) ([]model.User, error) {
-	ctx, span := tracing.CreateSpan(ctx, tr, "GetAllUsers_Func")
-	defer span.End()
+) ([]model.User, error) {
 	return t.repos.UserRepo.GetAllUsers()
 }
 
 func NewTelephoneService(
 	repos *repository.Repositories,
-	logger golog.ContextLogger,
 	tr trace.Tracer,
 	cfg *config.Config,
 ) *TelephoneService {
 	return &TelephoneService{
-		repos:  repos,
-		logger: logger,
-		tr:     tr,
-		cfg:    cfg,
+		repos: repos,
+		tr:    tr,
+		cfg:   cfg,
 	}
 }

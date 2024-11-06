@@ -1,23 +1,21 @@
 package v1
 
 import (
-	"git.tarlanpayments.kz/pkg/golog"
 	"go.opentelemetry.io/otel/trace"
+	pb "telephone/internal/proto"
 	"telephone/internal/service"
 )
 
 type Server struct {
 	services *service.Services
 	tr       trace.Tracer
-	logger   golog.ContextLogger
+	pb.UnimplementedUserContactServiceServer
 }
 
 func NewServer(services *service.Services,
-	tr trace.Tracer,
-	logger golog.ContextLogger) *Server {
+	tr trace.Tracer) *Server {
 	return &Server{
 		services: services,
 		tr:       tr,
-		logger:   logger,
 	}
 }

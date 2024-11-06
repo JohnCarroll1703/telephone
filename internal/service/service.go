@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"git.tarlanpayments.kz/pkg/golog"
-	"git.tarlanpayments.kz/processing/events/goevents/producer"
 	"go.opentelemetry.io/otel/trace"
 	"telephone/internal/config"
 	"telephone/internal/model"
@@ -13,31 +11,28 @@ import (
 
 func NewServices(deps Deps) *Services {
 	return &Services{
-		telephoneService:   NewTelephoneService(deps.Repos, deps.Logger, deps.JeagerTracer, deps.Cgf),
-		contactService:     NewContactService(deps.Repos, deps.Logger, deps.JeagerTracer, deps.Cgf),
-		userContactService: NewUserContactService(deps.Repos, deps.Logger, deps.JeagerTracer, deps.Cgf),
+		TelephoneService:   NewTelephoneService(deps.Repos, deps.JeagerTracer, deps.Cgf),
+		ContactService:     NewContactService(deps.Repos, deps.JeagerTracer, deps.Cgf),
+		UserContactService: NewUserContactService(deps.Repos, deps.JeagerTracer, deps.Cgf),
 	}
 }
 
 type Deps struct {
 	Repos        *repository.Repositories
 	Cgf          *config.Config
-	Logger       golog.ContextLogger
-	Producer     producer.Producer
 	JeagerTracer trace.Tracer
 }
 
 type Services struct {
-	telephoneService   Telephone
-	contactService     Contact
-	userContactService UserContactRelation
+	TelephoneService   Telephone
+	ContactService     Contact
+	UserContactService UserContactRelation
 }
 
 type Telephone interface {
-	CreateUser(ctx context.Context, user *schema.User) error
+	CreateUser(ctx context.Context, user *schema.User) (*model.User, error)
 	GetUserByID(ctx context.Context, id int) (schema.User, error)
-	GetAllUsers(ctx context.Context, tr trace.Tracer,
-		funcName string) ([]model.User, error)
+	GetAllUsers(ctx context.Context) ([]model.User, error)
 }
 
 type Contact interface {

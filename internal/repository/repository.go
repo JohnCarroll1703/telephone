@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"git.tarlanpayments.kz/pkg/golog"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"telephone/internal/config"
@@ -12,7 +11,7 @@ import (
 )
 
 type User interface {
-	CreateUser(ctx context.Context, user *model.User) error
+	CreateUser(ctx context.Context, user *model.User) (_ *model.User, err error)
 	GetUserByID(ctx context.Context, id int) (*model.User, error)
 	GetAllUsers() ([]model.User, error)
 }
@@ -46,11 +45,10 @@ type Repositories struct {
 func NewRepositories(
 	cfg *config.Config,
 	jaegerTrace trace.Tracer,
-	logger golog.ContextLogger,
 	db *gorm.DB) *Repositories {
-	userRepo := postgres.NewTelephone(logger, jaegerTrace, db)
-	contactRepo := postgres.NewContact(logger, jaegerTrace, db)
-	userContactsRepo := postgres.NewUserContacts(logger, jaegerTrace, db)
+	userRepo := postgres.NewTelephone(jaegerTrace, db)
+	contactRepo := postgres.NewContact(jaegerTrace, db)
+	userContactsRepo := postgres.NewUserContacts(jaegerTrace, db)
 	return &Repositories{
 		UserRepo:              userRepo,
 		ContactRepo:           contactRepo,

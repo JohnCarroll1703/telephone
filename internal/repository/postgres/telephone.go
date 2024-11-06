@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"errors"
-	"git.tarlanpayments.kz/pkg/golog"
 	"github.com/jackc/pgx/v5"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
@@ -15,20 +14,18 @@ import (
 
 type Telephone struct {
 	client   *http.Client
-	log      golog.ContextLogger
 	tr       trace.Tracer
 	postgres *pgx.Conn
 	db       *gorm.DB
 }
 
-func NewTelephone(log golog.ContextLogger, tr trace.Tracer, db *gorm.DB) *Telephone {
+func NewTelephone(tr trace.Tracer, db *gorm.DB) *Telephone {
 	return &Telephone{
 		client: &http.Client{
 			Timeout: time.Minute,
 		},
-		log: log,
-		tr:  tr,
-		db:  db,
+		tr: tr,
+		db: db,
 	}
 }
 
@@ -52,6 +49,10 @@ func (t Telephone) GetUserByID(ctx context.Context, id int) (user *model.User, e
 
 func (t Telephone) CreateUser(
 	ctx context.Context,
-	user *model.User) error {
-	return t.db.Create(&user).Error
+	user *model.User) (_ *model.User, err error) {
+	if err = t.db.WithContext(ctx).Create(&user).Error; err != nil {
+		return nil, terr.ErrDbUnexpected
+	}
+
+	return nil, nil
 }
