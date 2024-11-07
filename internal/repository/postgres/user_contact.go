@@ -53,20 +53,15 @@ func (u UserContacts) GetByUserIDContactID(userID int, contactID int) (
 	contactRelation *model.UserContactRelation,
 	err error) {
 	err = u.db.Where("contact_id = ? AND id = ?", contactID, userID).First(&contactRelation).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &model.UserContactRelation{}, terr.RecordNotFound
-		}
-		return nil, err
-	}
 
 	return contactRelation, err
 }
 
 func (u UserContacts) AddContacts(userID int, contactID int) (_ *model.UserContactRelation, err error) {
 	err = u.db.Create(&model.UserContactRelation{
-		UserID:    userID,
-		ContactID: contactID}).
+		UserID:     userID,
+		IsFavorite: true,
+		ContactID:  contactID}).
 		Error
 
 	if err != nil {

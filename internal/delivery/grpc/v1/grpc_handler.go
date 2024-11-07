@@ -112,7 +112,10 @@ func (srv *Server) AddUserContact(ctx context.Context, request *pb.AddContactReq
 ) (*pb.AddContactResponse, error) {
 	modelContact := schema.NewFromProtoToModelAddContactRequest(request)
 	if request.Phone == "" {
-		return nil, status.Error(codes.InvalidArgument, "phone is required")
+		return nil, status.Error(codes.InvalidArgument, "а что ты собрался добавлять?")
+	}
+	if request.Id == 0 {
+		return nil, status.Error(codes.InvalidArgument, "ээмм... а кому добавлять номер собрался то?")
 	}
 	resp, err := srv.services.UserContactService.AddContacts(ctx, request.Id, modelContact)
 	if err != nil {
