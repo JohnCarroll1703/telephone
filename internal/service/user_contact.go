@@ -70,7 +70,7 @@ func (s UserContactsService) AddContacts(
 }
 
 func (s UserContactsService) ListFav(ctx context.Context, userID int,
-) (*model.UserContactRelation, error) { // listFav типо
+) ([]model.Contact, error) { // listFav типо
 	user, err := s.repos.UserRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -79,7 +79,7 @@ func (s UserContactsService) ListFav(ctx context.Context, userID int,
 		return nil, err
 	}
 
-	res, err := s.repos.UserContactRepository.ListFav(user.ID)
+	res, err := s.repos.UserContactRepository.ListFav(uint64(user.ID))
 	return res, err
 }
 
@@ -87,7 +87,7 @@ func (s UserContactsService) GetByUserIDContactID(userID int, contactID int) (_ 
 	data, err := s.repos.UserContactRepository.GetByUserIDContactID(userID, contactID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &model.UserContactRelation{}, terr.RecordNotFound
+			return nil, terr.RecordNotFound
 		}
 		return nil, err
 	}
@@ -97,4 +97,9 @@ func (s UserContactsService) GetByUserIDContactID(userID int, contactID int) (_ 
 		ContactID:      data.ContactID,
 		IsFavorite:     true,
 	}, nil
+}
+
+func (s UserContactsService) GetAllRelations() (
+	[]model.UserContactRelation, error) {
+	return s.repos.UserContactRepository.GetAllRelations()
 }

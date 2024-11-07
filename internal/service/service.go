@@ -48,5 +48,7 @@ type UserContactRelation interface {
 		request *schema.AddContactRequest,
 	) (*schema.AddContactResponse, error)
 	ListFav(ctx context.Context, userID int,
-	) (*model.UserContactRelation, error)
+	) ([]model.Contact, error)
+	GetAllRelations() (
+		[]model.UserContactRelation, error)
 }

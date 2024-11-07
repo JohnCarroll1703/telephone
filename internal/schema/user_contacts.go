@@ -22,7 +22,7 @@ func NewFromProtoToModelRelationRequest(req *pb.CreateUserContactRelationRequest
 		ContactID:      int(req.UserContact.ContactId),
 		UserID:         int(req.UserContact.UserId),
 		Contact: Contact{
-			ContactID: uint64(req.UserContact.ContactId),
+			ContactID: req.UserContact.ContactId,
 		},
 		User: User{
 			ID: int(req.UserContact.UserId),

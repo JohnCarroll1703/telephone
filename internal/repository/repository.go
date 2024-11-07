@@ -7,7 +7,6 @@ import (
 	"telephone/internal/config"
 	"telephone/internal/model"
 	"telephone/internal/repository/postgres"
-	"telephone/internal/schema"
 )
 
 type User interface {
@@ -23,17 +22,18 @@ type Contact interface {
 	GetByPhone(
 		ctx context.Context,
 		phone string,
-	) (resp *model.Contact, err error)
+	) (*model.Contact, error)
 }
 
 type UserContacts interface {
-	GetByPhone(ctx context.Context, req schema.ContactRequest,
-	) (contactRelation *model.UserContactRelation, err error)
+	GetByPhone(ctx context.Context, phone string) (
+		contactRelation *model.UserContactRelation, err error)
 	AddContacts(userID int, contactID int) (_ *model.UserContactRelation, err error)
 	GetByUserIDContactID(userID int, contactID int) (
 		contactRelation *model.UserContactRelation,
 		err error)
-	ListFav(userID int) (contactRelation *model.UserContactRelation, err error)
+	ListFav(userID uint64) ([]model.Contact, error)
+	GetAllRelations() ([]model.UserContactRelation, error)
 }
 
 type Repositories struct {

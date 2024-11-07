@@ -22,6 +22,15 @@ message UserContacts{
   uint64 user_id = 4;
 }
 
+message AddContactRequest{
+  uint64 id = 1;
+  string phone = 2;
+}
+
+message AddContactResponse{
+  string status = 1;
+  string phone = 2;
+}
 
 message AddUserContactResponse{
   bool success = 1;
@@ -72,8 +81,13 @@ message GetUserResponse {
   User user = 1;
 }
 
+message GetAllRelationsRequest {
+
+}
+
 message GetUserContactRelationResponse {
-  uint64 contact_id = 1;
+  uint64 user_id = 1;
+  repeated Contact contacts = 3;
 }
 
 message CreateUserContactRelationRequest {
@@ -82,7 +96,7 @@ message CreateUserContactRelationRequest {
 
 message CreateUserContactRelationResponse {
   uint64 user_contacts_id = 1;
-  uint64 contact_id = 2;
+  uint64 user_id = 2;
 }
 
 message GetUsersRequest{
@@ -93,6 +107,10 @@ message GetContactsRequest{
 
 }
 
+message GetAllRelationsResponse{
+  repeated UserContacts relations = 1;
+}
+
 message GetUsersResponse{
   repeated User users = 1;
 }
@@ -100,10 +118,11 @@ message GetUsersResponse{
 service UserContactService{
   rpc CreateContact(CreateContactRequest) returns (CreateContactResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc AddUserContact(AddUserContactRequest) returns (AddUserContactResponse);
+  rpc AddUserContact(AddContactRequest) returns (AddContactResponse);
   rpc GetAllUsers(GetUsersRequest) returns (GetUsersResponse);
   rpc GetContact(GetContactRequest) returns (GetContactResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc GetUserContact(GetUserRequest) returns (GetUserContactRelationResponse);
   rpc GetContacts(GetContactsRequest) returns (GetContactsResponse);
+  rpc GetAllRelations(GetAllRelationsRequest) returns (GetAllRelationsResponse);
 }

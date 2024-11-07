@@ -108,21 +108,65 @@ func (srv *Server) GetContacts(ctx context.Context, empty *pb.GetContactsRequest
 	return resp, nil
 }
 
-func (srv *Server) AddUserContact(ctx context.Context, request *pb.AddUserContactRequest) (*pb.AddUserContactResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func (srv *Server) AddUserContact(ctx context.Context, request *pb.AddContactRequest,
+) (*pb.AddContactResponse, error) {
+	modelContact := schema.NewFromProtoToModelAddContactRequest(request)
+	if request.Phone == "" {
+		return nil, status.Error(codes.InvalidArgument, "phone is required")
+	}
+	resp, err := srv.services.UserContactService.AddContacts(ctx, request.Id, modelContact)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.AddContactResponse{
+		Phone:  resp.PhoneNumber,
+		Status: "the contact is added successfully!",
+	}, nil
 }
 
 func (srv *Server) GetUserContact(ctx context.Context, request *pb.GetUserRequest,
-) (*pb.GetUserContactRelationResponse, error) {
+) (resp *pb.GetUserContactRelationResponse, err error) {
 	relations, err := srv.services.UserContactService.ListFav(ctx, int(request.Id))
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &pb.GetUserContactRelationResponse{
-		ContactId: uint64(relations.ContactID),
+	contactsList := make([]*pb.Contact, len(relations))
+
+	for i, contact := range relations {
+		contactsList[i] = &pb.Contact{
+			ContactId: uint64(contact.ContactID),
+			Phone:     contact.PhoneNumber,
+		}
 	}
 
+	resp = &pb.GetUserContactRelationResponse{
+		UserId:   uint64(request.Id),
+		Contacts: contactsList,
+	}
+	return resp, nil
+}
+
+func (srv *Server) GetAllRelations(ctx context.Context, empty *pb.GetAllRelationsRequest) (
+	resp *pb.GetAllRelationsResponse, err error) {
+	relations, err := srv.services.UserContactService.GetAllRelations()
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &pb.GetAllRelationsResponse{
+		Relations: []*pb.UserContacts{},
+	}
+
+	for _, c := range relations {
+		res := &pb.UserContacts{
+			ContactId: uint64(c.ContactID),
+			IsFav:     true,
+			UserId:    uint64(c.UserID),
+		}
+
+		resp.Relations = append(resp.Relations, res)
+	}
 	return resp, nil
 }

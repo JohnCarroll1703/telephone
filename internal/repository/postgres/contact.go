@@ -39,10 +39,10 @@ func (c Contact) GetAllContacts() ([]model.Contact, error) {
 func (c Contact) GetByPhone(
 	ctx context.Context,
 	phone string,
-) (resp *model.Contact, err error) {
-	err = c.db.Where("contact_id = ?").
-		Find(&phone).Error
-	return resp, err
+) (*model.Contact, error) {
+	var contact *model.Contact
+	err := c.db.Where("phone_number = ?", phone).Find(&contact).Error
+	return contact, err
 }
 
 func NewContact(

@@ -40,6 +40,12 @@ func NewCreateContactRequest(req *Contact) *model.Contact {
 	}
 }
 
+func NewFromProtoToModelAddContactRequest(req *pb.AddContactRequest) *AddContactRequest {
+	return &AddContactRequest{
+		PhoneNumber: req.Phone,
+	}
+}
+
 func NewFromProtoToModelCreateContactRequest(req *pb.CreateContactRequest) *Contact {
 	return &Contact{
 		PhoneNumber: req.Contact.Phone,
