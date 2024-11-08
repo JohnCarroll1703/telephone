@@ -195,27 +195,38 @@ func (srv *Server) GetAllRelations(ctx context.Context, empty *pb.GetAllRelation
 	return resp, nil
 }
 
-//func (srv *Server) GetUsersWithPaginationAndFiltering(ctx context.Context,
-//	input *pb.GetUsersWithPaginationAndFilteringRequest) (
-//	resp *pb.GetUsersWithPaginationAndFilteringResponse, err error) {
-//	if input.Page < 1 {
-//		input.Page = 1
-//	}
-//
-//	if input.Limit < 1 {
-//		input.Limit = 10
-//	}
-//
-//	filter := map[string]interface{}{
-//		"name": input.Name,
-//	}
-//
-//	users, pagination, err := srv.services.TelephoneService.GetAllUsersWithPaginationAndFiltering()
-//
-//	resp = &pb.GetUsersWithPaginationAndFilteringResponse{
-//		Users: []*pb.User{},
-//	}
-//	for _, val := range users {
-//		user := &pb.User{}
-//	}
-//}
+func (srv *Server) GetUsersWithPaginationAndFiltering(ctx context.Context,
+	input *pb.GetUsersWithPaginationAndFilteringRequest) (
+	*pb.GetUsersWithPaginationAndFilteringResponse, error) {
+	if input.Page < 1 {
+		input.Page = 1
+	}
+
+	if input.Limit < 1 {
+		input.Limit = 10
+	}
+
+	filter := map[string]interface{}{
+		"name": input.Name,
+	}
+
+	users, _, err := srv.services.TelephoneService.GetAllUsersWithPaginationAndFiltering(
+		int(input.Limit), int(input.Page), input.Sort, filter, input.Direction)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	resp := []*pb.User{}
+	for _, val := range users {
+		user := &pb.User{
+			UserId: uint64(val.ID),
+			Name:   val.Name,
+			Email:  val.Email,
+		}
+
+		resp = append(resp, user)
+	}
+
+	return &pb.GetUsersWithPaginationAndFilteringResponse{
+		Users: resp,
+	}, nil
+}

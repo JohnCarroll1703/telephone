@@ -77,6 +77,10 @@ func (t Telephone) GetAllUsersWithPaginationAndFiltering(limit int, page int,
 		direction = "asc"
 	}
 
+	if strings.EqualFold(direction, "desc") {
+		direction = "desc"
+	}
+
 	query = query.Order(fmt.Sprintf("%s %s", direction, sort))
 
 	err := t.db.Scopes(t.Paginate(users, &pagination, query,
