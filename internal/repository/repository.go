@@ -33,8 +33,8 @@ type Contact interface {
 type UserContacts interface {
 	GetByPhone(ctx context.Context, phone string) (
 		contactRelation *model.UserContactRelation, err error)
-	AddContacts(userID int, contactID int) (_ *model.UserContactRelation, err error)
-	GetByUserIDContactID(userID int, contactID int) (
+	AddContacts(userID uint, contactID uint) (_ *model.UserContactRelation, err error)
+	GetByUserIDContactID(userID uint, contactID uint) (
 		contactRelation *model.UserContactRelation,
 		err error)
 	ListFav(userID uint64) ([]model.Contact, error)

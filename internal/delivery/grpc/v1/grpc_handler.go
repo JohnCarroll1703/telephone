@@ -152,7 +152,7 @@ func (srv *Server) AddUserContact(ctx context.Context, request *pb.AddContactReq
 
 func (srv *Server) GetUserContact(ctx context.Context, request *pb.GetUserRequest,
 ) (resp *pb.GetUserContactRelationResponse, err error) {
-	relations, err := srv.services.UserContactService.ListFav(ctx, int(request.Id))
+	relations, err := srv.services.UserContactService.ListFav(ctx, uint(request.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func (srv *Server) GetUserContact(ctx context.Context, request *pb.GetUserReques
 	}
 
 	return &pb.GetUserContactRelationResponse{
-		UserId:   uint64(request.Id),
+		UserId:   request.Id,
 		Contacts: contactsList,
 	}, nil
 }

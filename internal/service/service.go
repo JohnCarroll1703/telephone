@@ -53,7 +53,7 @@ type UserContactRelation interface {
 		userID uint64,
 		request *schema.AddContactRequest,
 	) (*schema.AddContactResponse, error)
-	ListFav(ctx context.Context, userID int,
+	ListFav(ctx context.Context, userID uint,
 	) ([]model.Contact, error)
 	GetAllRelations() (
 		[]model.UserContactRelation, error)

@@ -58,11 +58,11 @@ message CreateContactResponse {
 }
 
 message GetContactRequest {
-  int32 contact_id = 1;
+  uint64 contact_id = 1;
 }
 
 message GetUserRequest {
-  int32 id = 1;
+  uint64 id = 1;
 }
 
 message GetContactsResponse{

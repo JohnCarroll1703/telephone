@@ -40,17 +40,16 @@ type ContactResponse struct {
 
 type AddContactRequest struct {
 	Id          uint   `json:"id"`
-	ContactName string `json:"contact_name"`
 	PhoneNumber string `json:"phone_number"`
 }
 
 func (r AddContactRequest) Validate() error {
-	if r.ContactName == "" {
+	if r.PhoneNumber == "" {
 		return status.Error(codes.InvalidArgument, "а что ты собрался добавлять?")
 	}
-	if r.Id == 0 {
-		return status.Error(codes.InvalidArgument, "ээмм... а кому добавлять номер собрался то?")
-	}
+	//if r.Id == 0 {
+	//	return status.Error(codes.InvalidArgument, "ээмм... а кому добавлять номер собрался то?")
+	//}
 
 	if err := validator.New().Struct(r); err != nil {
 		return err

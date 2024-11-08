@@ -25,7 +25,7 @@ func NewFromProtoToModelRelationRequest(req *pb.CreateUserContactRelationRequest
 			ContactID: req.UserContact.ContactId,
 		},
 		User: User{
-			ID: int(req.UserContact.UserId),
+			ID: uint(req.UserContact.UserId),
 		},
 	}
 }

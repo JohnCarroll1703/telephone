@@ -6,9 +6,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"net/http"
-	"strings"
 	"telephone/internal/model"
-	"telephone/internal/schema"
 	"telephone/pkg/terr"
 )
 
@@ -49,7 +47,7 @@ func (u UserContacts) GetByPhone(ctx context.Context, phone string) (contactRela
 	return contactRelation, err
 }
 
-func (u UserContacts) GetByUserIDContactID(userID int, contactID int) (
+func (u UserContacts) GetByUserIDContactID(userID uint, contactID uint) (
 	contactRelation *model.UserContactRelation,
 	err error) {
 	err = u.db.Where("contact_id = ? AND id = ?", contactID, userID).First(&contactRelation).Error
@@ -57,7 +55,7 @@ func (u UserContacts) GetByUserIDContactID(userID int, contactID int) (
 	return contactRelation, err
 }
 
-func (u UserContacts) AddContacts(userID int, contactID int) (_ *model.UserContactRelation, err error) {
+func (u UserContacts) AddContacts(userID uint, contactID uint) (_ *model.UserContactRelation, err error) {
 	err = u.db.Create(&model.UserContactRelation{
 		UserID:     userID,
 		IsFavorite: true,
@@ -75,27 +73,6 @@ func (u UserContacts) GetAllRelations() ([]model.UserContactRelation, error) {
 	var relations []model.UserContactRelation
 	err := u.db.Model(&model.UserContactRelation{}).Find(&relations).Error
 	return relations, err
-}
-
-func (u UserContacts) sortBy(filter schema.UserAndContactFilter) string {
-	sortRes := strings.Split(filter.SortBy, ",")
-	sort := ""
-
-	for key, value := range sortRes {
-		if key%2 == 0 {
-			sort += value + " "
-		} else {
-			sort += value + sortBySeparator
-		}
-	}
-
-	if sort == " " {
-		return schema.DefaultOrder
-	}
-
-	sort = sort[:len(sort)-2]
-
-	return sort
 }
 
 func NewUserContacts(
