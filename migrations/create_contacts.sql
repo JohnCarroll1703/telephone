@@ -17,4 +17,4 @@ CREATE TABLE user_contacts(
     id INTEGER FOREIGN KEY REFERENCES users(id)
 );
 
-
+SELECT * FROM user_contact_relation;

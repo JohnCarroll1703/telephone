@@ -4,6 +4,7 @@
     <inspection_tool class="GoDfaErrorMayBeNotNil" enabled="true" level="WARNING" enabled_by_default="true">
       <methods>
         <method importPath="telephone/internal/repository" receiver="User" name="GetUserByID" />
+        <method importPath="telephone/internal/service" receiver="Telephone" name="GetUserByID" />
       </methods>
     </inspection_tool>
   </profile>

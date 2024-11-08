@@ -31,8 +31,14 @@ type Services struct {
 
 type Telephone interface {
 	CreateUser(ctx context.Context, user *schema.User) (*model.User, error)
-	GetUserByID(ctx context.Context, id int) (schema.User, error)
+	GetUserByID(ctx context.Context, id uint) (schema.User, error)
 	GetAllUsers(ctx context.Context) ([]model.User, error)
+	GetAllUsersWithPaginationAndFiltering(
+		limit int, page int,
+		sort string,
+		filter map[string]interface{},
+		direction string,
+	) ([]model.User, *model.Paginate, error)
 }
 
 type Contact interface {

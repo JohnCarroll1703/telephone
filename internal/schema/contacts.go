@@ -1,6 +1,9 @@
 package schema
 
 import (
+	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"telephone/internal/model"
 	pb "telephone/internal/proto"
 	"time"
@@ -10,6 +13,18 @@ type Contact struct {
 	ContactID   uint64 `json:"id"`
 	ContactName string `json:"contact_name"`
 	PhoneNumber string `json:"phone_number"`
+}
+
+func (c Contact) Validate() error {
+	if c.PhoneNumber == "" {
+		return status.Error(codes.InvalidArgument, "телефон не может быть пустым")
+	}
+
+	if err := validator.New().Struct(c); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type ContactRequest struct {
@@ -24,8 +39,24 @@ type ContactResponse struct {
 }
 
 type AddContactRequest struct {
+	Id          uint   `json:"id"`
 	ContactName string `json:"contact_name"`
 	PhoneNumber string `json:"phone_number"`
+}
+
+func (r AddContactRequest) Validate() error {
+	if r.ContactName == "" {
+		return status.Error(codes.InvalidArgument, "а что ты собрался добавлять?")
+	}
+	if r.Id == 0 {
+		return status.Error(codes.InvalidArgument, "ээмм... а кому добавлять номер собрался то?")
+	}
+
+	if err := validator.New().Struct(r); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type AddContactResponse struct {
@@ -35,7 +66,7 @@ type AddContactResponse struct {
 
 func NewCreateContactRequest(req *Contact) *model.Contact {
 	return &model.Contact{
-		ContactID:   int(req.ContactID),
+		ContactID:   uint(req.ContactID),
 		PhoneNumber: req.PhoneNumber,
 	}
 }

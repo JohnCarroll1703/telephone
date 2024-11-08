@@ -11,8 +11,13 @@ import (
 
 type User interface {
 	CreateUser(ctx context.Context, user *model.User) (_ *model.User, err error)
-	GetUserByID(ctx context.Context, id int) (*model.User, error)
+	GetUserByID(ctx context.Context, id uint) (*model.User, error)
 	GetAllUsers() ([]model.User, error)
+	GetAllUsersWithPaginationAndFiltering(limit int, page int,
+		sort string,
+		filter map[string]interface{},
+		direction string) ([]model.User,
+		*model.Paginate, error)
 }
 
 type Contact interface {

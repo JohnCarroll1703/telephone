@@ -19,7 +19,7 @@ func (t TelephoneService) CreateUser(ctx context.Context, user *schema.User) (_ 
 	return t.repos.UserRepo.CreateUser(ctx, schema.NewCreateUserRequest(user))
 }
 
-func (t TelephoneService) GetUserByID(ctx context.Context, id int) (schema.User, error) {
+func (t TelephoneService) GetUserByID(ctx context.Context, id uint) (schema.User, error) {
 	data, err := t.repos.UserRepo.GetUserByID(ctx, id)
 	if err != nil {
 		return schema.User{}, err
@@ -35,6 +35,21 @@ func (t TelephoneService) GetUserByID(ctx context.Context, id int) (schema.User,
 func (t TelephoneService) GetAllUsers(ctx context.Context,
 ) ([]model.User, error) {
 	return t.repos.UserRepo.GetAllUsers()
+}
+
+func (t TelephoneService) GetAllUsersWithPaginationAndFiltering(
+	limit int, page int,
+	sort string,
+	filter map[string]interface{},
+	direction string,
+) ([]model.User, *model.Paginate, error) {
+	resp, pagination, err := t.repos.UserRepo.GetAllUsersWithPaginationAndFiltering(
+		limit, page,
+		sort,
+		filter,
+		direction)
+
+	return resp, pagination, err
 }
 
 func NewTelephoneService(

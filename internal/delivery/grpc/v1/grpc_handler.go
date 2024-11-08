@@ -4,15 +4,23 @@ import (
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"strconv"
 	pb "telephone/internal/proto"
 	"telephone/internal/schema"
 )
 
 func (srv *Server) CreateUser(ctx context.Context, request *pb.CreateUserRequest,
-) (*pb.CreateUserResponse, error) {
+) (_ *pb.CreateUserResponse, err error) {
 
 	modelUser := schema.NewFromProtoToModelUserRequest(request)
 
+	err = modelUser.Validate()
+	if err != nil {
+		return nil, status.Error(
+			codes.InvalidArgument,
+			err.Error(),
+		)
+	}
 	res, err := srv.services.TelephoneService.CreateUser(ctx, modelUser)
 	if err != nil {
 		return nil, err
@@ -23,13 +31,18 @@ func (srv *Server) CreateUser(ctx context.Context, request *pb.CreateUserRequest
 }
 
 func (srv *Server) CreateContact(ctx context.Context, req *pb.CreateContactRequest,
-) (*pb.CreateContactResponse, error) {
-	if req.Contact.Phone == "" {
-		return nil, status.Error(codes.InvalidArgument,
-			"phone is required")
-	}
+) (_ *pb.CreateContactResponse, err error) {
 
 	modelContact := schema.NewFromProtoToModelCreateContactRequest(req)
+
+	err = modelContact.Validate()
+	if err != nil {
+		return nil, status.Error(
+			codes.InvalidArgument,
+			err.Error(),
+		)
+	}
+
 	res, err := srv.services.ContactService.CreateContact(ctx, modelContact)
 	if err != nil {
 		return nil, err
@@ -61,7 +74,7 @@ func (srv *Server) GetAllUsers(ctx context.Context, empty *pb.GetUsersRequest) (
 }
 
 func (srv *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
-	resp, err := srv.services.TelephoneService.GetUserByID(ctx, int(req.Id))
+	resp, err := srv.services.TelephoneService.GetUserByID(ctx, uint(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -109,14 +122,23 @@ func (srv *Server) GetContacts(ctx context.Context, empty *pb.GetContactsRequest
 }
 
 func (srv *Server) AddUserContact(ctx context.Context, request *pb.AddContactRequest,
-) (*pb.AddContactResponse, error) {
+) (_ *pb.AddContactResponse, err error) {
 	modelContact := schema.NewFromProtoToModelAddContactRequest(request)
-	if request.Phone == "" {
-		return nil, status.Error(codes.InvalidArgument, "а что ты собрался добавлять?")
+
+	err = modelContact.Validate()
+	if err != nil {
+		return nil, status.Error(
+			codes.InvalidArgument,
+			err.Error(),
+		)
 	}
-	if request.Id == 0 {
-		return nil, status.Error(codes.InvalidArgument, "ээмм... а кому добавлять номер собрался то?")
+
+	user, err := srv.services.TelephoneService.GetUserByID(ctx, uint(request.Id))
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "пользователя "+
+			strconv.Itoa(int(user.ID))+" не существует")
 	}
+
 	resp, err := srv.services.UserContactService.AddContacts(ctx, request.Id, modelContact)
 	if err != nil {
 		return nil, err
@@ -144,11 +166,10 @@ func (srv *Server) GetUserContact(ctx context.Context, request *pb.GetUserReques
 		}
 	}
 
-	resp = &pb.GetUserContactRelationResponse{
+	return &pb.GetUserContactRelationResponse{
 		UserId:   uint64(request.Id),
 		Contacts: contactsList,
-	}
-	return resp, nil
+	}, nil
 }
 
 func (srv *Server) GetAllRelations(ctx context.Context, empty *pb.GetAllRelationsRequest) (
@@ -173,3 +194,28 @@ func (srv *Server) GetAllRelations(ctx context.Context, empty *pb.GetAllRelation
 	}
 	return resp, nil
 }
+
+//func (srv *Server) GetUsersWithPaginationAndFiltering(ctx context.Context,
+//	input *pb.GetUsersWithPaginationAndFilteringRequest) (
+//	resp *pb.GetUsersWithPaginationAndFilteringResponse, err error) {
+//	if input.Page < 1 {
+//		input.Page = 1
+//	}
+//
+//	if input.Limit < 1 {
+//		input.Limit = 10
+//	}
+//
+//	filter := map[string]interface{}{
+//		"name": input.Name,
+//	}
+//
+//	users, pagination, err := srv.services.TelephoneService.GetAllUsersWithPaginationAndFiltering()
+//
+//	resp = &pb.GetUsersWithPaginationAndFilteringResponse{
+//		Users: []*pb.User{},
+//	}
+//	for _, val := range users {
+//		user := &pb.User{}
+//	}
+//}
